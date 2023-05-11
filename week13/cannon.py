@@ -12,8 +12,7 @@ RED = (255, 0, 0)
 #hello this is a test hellos-
 SCREEN_SIZE = (800, 600)
 
-#bao test
-#again
+#test 2 
 def rand_color():
     return (randint(0, 255), randint(0, 255), randint(0, 255))
 
