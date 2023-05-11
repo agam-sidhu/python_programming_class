@@ -131,6 +131,7 @@ class Cannon(GameObject):
         '''
         Draws the gun on the screen.
         '''
+        
         gun_shape = []
         vec_1 = np.array([int(5*np.cos(self.angle - np.pi/2)), int(5*np.sin(self.angle - np.pi/2))])
         vec_2 = np.array([int(self.pow*np.cos(self.angle)), int(self.pow*np.sin(self.angle))])
