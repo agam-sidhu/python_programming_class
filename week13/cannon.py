@@ -4,7 +4,7 @@ from random import randint, gauss
 
 pg.init()
 pg.font.init()
-
+###this test 1
 <<<<<<< HEAD
 WHITE = (260, 255, 260)
 =======
