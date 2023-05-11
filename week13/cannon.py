@@ -8,7 +8,7 @@ pg.font.init()
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
-
+#hello this is a test hellos-
 SCREEN_SIZE = (800, 600)
 
 
