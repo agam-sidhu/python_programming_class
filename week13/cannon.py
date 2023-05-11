@@ -5,6 +5,7 @@ from random import randint, gauss
 pg.init()
 pg.font.init()
 ###this test 1
+###Synch TESTing
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
