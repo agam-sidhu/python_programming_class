@@ -1,6 +1,7 @@
 import numpy as np
 import pygame as pg
 import math
+import random
 from random import randint, gauss
 
 pg.init()
@@ -343,6 +344,7 @@ class Manager:
     def __init__(self, n_targets=1):
         self.balls = []
         self.gun = Cannon()
+        self.enemy_cannon = EnemyCannon()
         self.targets = []
         self.score_t = ScoreTable()
         self.n_targets = n_targets
@@ -357,7 +359,6 @@ class Manager:
                 30 - max(0, self.score_t.score()))))
             self.targets.append(Target(rad=randint(max(1, 30 - 2*max(0, self.score_t.score())),
                 30 - max(0, self.score_t.score()))))
-
 
     def process(self, events, screen):
         '''
@@ -389,13 +390,17 @@ class Manager:
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_UP:
                     self.gun.verticalMove(-5)
+                    self.enemy_cannon.verticalMove(random_num())
                 elif event.key == pg.K_DOWN:
                     self.gun.verticalMove(5)
+                    self.enemy_cannon.verticalMove(-1* random_num())
                 # implemented the horizontal movement with the left and right keys
                 elif event.key == pg.K_LEFT:
                     self.gun.horizontalMove(-5)
+                    self.enemy_cannon.horizontalMove(random_num())
                 elif event.key == pg.K_RIGHT:
                     self.gun.horizontalMove(5)
+                    self.enemy_cannon.horizontalMove(-1* random_num())
             elif event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     self.gun.activate()
@@ -405,6 +410,54 @@ class Manager:
                     self.score_t.b_used += 1
         return done
     
+    def random_num():
+        random_number = random.randint(1, 10)
+        return random_number
+    
+    def enemy_cannon_movement(self):
+        '''
+        Controls the movement of the enemy cannon.
+        '''
+        target_pos = self.get_nearest_target_position()
+        self.enemy_cannon.set_angle(target_pos)
+
+        # Move the enemy cannon vertically towards the nearest target
+        if self.enemy_cannon.coord[1] > target_pos[1]:
+            self.enemy_cannon.verticalMove(-1)
+        elif self.enemy_cannon.coord[1] < target_pos[1]:
+            self.enemy_cannon.verticalMove(1)
+
+    def enemy_cannon_shoot(self):
+        '''
+        Controls the shooting of the enemy cannon.
+        '''
+        if self.enemy_cannon.shoot_time is None:
+            self.enemy_cannon.shoot_time = pg.time.get_ticks()
+        else:
+            elapsed_time = pg.time.get_ticks() - self.enemy_cannon.shoot_time
+            if elapsed_time >= self.enemy_cannon.time_to_shoot * 1000:
+                ball = self.enemy_cannon.strike()
+                self.balls.append(ball)
+                self.enemy_cannon.shoot_time = None
+
+    def get_nearest_target_position(self):
+        '''
+        Returns the position of the nearest target.
+        '''
+        if len(self.targets) == 0:
+            return self.gun.coord
+
+        min_distance = float('inf')
+        nearest_pos = None
+
+        for target in self.targets:
+            distance = math.sqrt((target.coord[0] - self.enemy_cannon.coord[0])**2 + (target.coord[1] - self.enemy_cannon.coord[1])**2)
+            if distance < min_distance:
+                min_distance = distance
+                nearest_pos = target.coord
+
+        return nearest_pos
+
     def draw(self, screen):
         '''
         Runs balls', gun's, targets' and score table's drawing method.
@@ -414,6 +467,7 @@ class Manager:
         for target in self.targets:
             target.draw(screen)
         self.gun.draw(screen)
+        self.enemy_cannon.draw(screen) 
         self.score_t.draw(screen)
 
     def move(self):
@@ -462,6 +516,7 @@ while not done:
     screen.fill(BLACK)
 
     done = mgr.process(pg.event.get(), screen) 
+    
 
     pg.display.flip()
 
