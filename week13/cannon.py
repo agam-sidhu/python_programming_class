@@ -404,26 +404,13 @@ class Manager:
             elif event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     self.gun.activate()
+                    self.enemy_cannon.activate()
             elif event.type == pg.MOUSEBUTTONUP:
                 if event.button == 1:
                     self.balls.append(self.gun.strike())
                     self.score_t.b_used += 1
         return done
-    
- 
-    
-    def enemy_cannon_movement(self):
-        '''
-        Controls the movement of the enemy cannon.
-        '''
-        target_pos = self.get_nearest_target_position()
-        self.enemy_cannon.set_angle(target_pos)
 
-        # Move the enemy cannon vertically towards the nearest target
-        if self.enemy_cannon.coord[1] > target_pos[1]:
-            self.enemy_cannon.verticalMove(-1)
-        elif self.enemy_cannon.coord[1] < target_pos[1]:
-            self.enemy_cannon.verticalMove(1)
 
     def enemy_cannon_shoot(self):
         '''
