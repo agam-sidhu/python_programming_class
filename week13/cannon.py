@@ -275,7 +275,7 @@ class EnemyCannon(Cannon):
     '''
     def __init__(self, coord=[SCREEN_SIZE[0]-30, SCREEN_SIZE[1]//2], angle=0, max_pow=50, min_pow=10, color=RED):
         super().__init__(coord, angle, max_pow, min_pow, color)
-        self.time_to_shoot = 120 # time delay to shoot in frames
+        self.time_to_shoot = 2 # time delay to shoot in frames
         self.shoot_time = None # time the cannon shot
 
 class MovingTargets(Target):
@@ -404,6 +404,7 @@ class Manager:
                     self.balls.append(self.gun.strike())
                     self.score_t.b_used += 1
         return done
+    
     def draw(self, screen):
         '''
         Runs balls', gun's, targets' and score table's drawing method.
