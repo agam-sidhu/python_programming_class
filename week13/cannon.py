@@ -266,6 +266,15 @@ class Target(GameObject):
         """
         pass
 
+class EnemyCannon(Cannon):
+    '''
+    EnemyCannon class. Inherited from the Cannon class.
+    '''
+    def __init__(self, coord=[SCREEN_SIZE[0]-30, SCREEN_SIZE[1]//2], angle=0, max_pow=50, min_pow=10, color=RED):
+        super().__init__(coord, angle, max_pow, min_pow, color)
+        self.time_to_shoot = 120 # time delay to shoot in frames
+        self.shoot_time = None # time the cannon shot
+
 class MovingTargets(Target):
     def __init__(self, coord = None, color = None, rad = 30, sides = 0):
         super().__init__(coord, color, rad)
