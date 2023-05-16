@@ -455,7 +455,6 @@ clock = pg.time.Clock()
 
 mgr = Manager(n_targets=3)
 
-#cannon2 = EnemyCannon(coord=[SCREEN_SIZE[0]-30, SCREEN_SIZE[1]//2], angle=0, max_pow=50, min_pow=10, color=RED)
 
 while not done:
     clock.tick(15)
