@@ -120,6 +120,9 @@ class Cannon(GameObject):
         '''
         self.angle = np.arctan2(target_pos[1] - self.coord[1], target_pos[0] - self.coord[0])
 
+    def enemy_cannon(self, user_pos):
+        self.set_angle(user_pos)
+        return self.strike()
     def move(self, inc):
         '''
         Changes vertical position of the gun.
