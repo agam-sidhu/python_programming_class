@@ -390,17 +390,17 @@ class Manager:
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_UP:
                     self.gun.verticalMove(-5)
-                    self.enemy_cannon.verticalMove(random_num())
+                    self.enemy_cannon.verticalMove(random.randint(-10, 10))
                 elif event.key == pg.K_DOWN:
                     self.gun.verticalMove(5)
-                    self.enemy_cannon.verticalMove(-1* random_num())
+                    self.enemy_cannon.verticalMove(random.randint(-10, 10))
                 # implemented the horizontal movement with the left and right keys
                 elif event.key == pg.K_LEFT:
                     self.gun.horizontalMove(-5)
-                    self.enemy_cannon.horizontalMove(random_num())
+                    self.enemy_cannon.horizontalMove(random.randint(-10, 10))
                 elif event.key == pg.K_RIGHT:
                     self.gun.horizontalMove(5)
-                    self.enemy_cannon.horizontalMove(-1* random_num())
+                    self.enemy_cannon.horizontalMove(random.randint(-10, 10))
             elif event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     self.gun.activate()
@@ -410,9 +410,7 @@ class Manager:
                     self.score_t.b_used += 1
         return done
     
-    def random_num():
-        random_number = random.randint(1, 10)
-        return random_number
+ 
     
     def enemy_cannon_movement(self):
         '''
