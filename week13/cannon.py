@@ -279,6 +279,41 @@ class EnemyCannon(Cannon):
         self.time_to_shoot = 2 # time delay to shoot in frames
         self.shoot_time = None # time the cannon shot
 
+    def cannon_movement(self):
+        self.verticalMove(random.randint(-30, 30))
+        self.horizontalMove(random.randint(-30, 30))
+    
+    def enemy_cannon_shoot(self):
+        '''
+        Controls the shooting of the enemy cannon.
+        '''
+        if self.enemy_cannon.shoot_time is None:
+            self.enemy_cannon.shoot_time = pg.time.get_ticks()
+        else:
+            elapsed_time = pg.time.get_ticks() - self.enemy_cannon.shoot_time
+            if elapsed_time >= self.enemy_cannon.time_to_shoot * 1000:
+                ball = self.enemy_cannon.strike()
+                self.balls.append(ball)
+                self.enemy_cannon.shoot_time = None
+
+    def get_nearest_target_position(self):
+        '''
+        Returns the position of the nearest target.
+        '''
+        if len(self.targets) == 0:
+            return self.gun.coord
+
+        min_distance = float('inf')
+        nearest_pos = None
+
+        for target in self.targets:
+            distance = math.sqrt((target.coord[0] - self.enemy_cannon.coord[0])**2 + (target.coord[1] - self.enemy_cannon.coord[1])**2)
+            if distance < min_distance:
+                min_distance = distance
+                nearest_pos = target.coord
+
+        return nearest_pos
+
 class MovingTargets(Target):
     def __init__(self, coord = None, color = None, rad = 30, sides = 0):
         super().__init__(coord, color, rad)
@@ -390,17 +425,17 @@ class Manager:
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_UP:
                     self.gun.verticalMove(-5)
-                    self.enemy_cannon.verticalMove(random.randint(-10, 10))
+                    self.enemy_cannon.cannon_movement()
                 elif event.key == pg.K_DOWN:
                     self.gun.verticalMove(5)
-                    self.enemy_cannon.verticalMove(random.randint(-10, 10))
+                    self.enemy_cannon.cannon_movement()
                 # implemented the horizontal movement with the left and right keys
                 elif event.key == pg.K_LEFT:
                     self.gun.horizontalMove(-5)
-                    self.enemy_cannon.horizontalMove(random.randint(-10, 10))
+                    self.enemy_cannon.cannon_movement()
                 elif event.key == pg.K_RIGHT:
                     self.gun.horizontalMove(5)
-                    self.enemy_cannon.horizontalMove(random.randint(-10, 10))
+                    self.enemy_cannon.cannon_movement()
             elif event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     self.gun.activate()
@@ -410,37 +445,6 @@ class Manager:
                     self.score_t.b_used += 1
         return done
 
-
-    def enemy_cannon_shoot(self):
-        '''
-        Controls the shooting of the enemy cannon.
-        '''
-        if self.enemy_cannon.shoot_time is None:
-            self.enemy_cannon.shoot_time = pg.time.get_ticks()
-        else:
-            elapsed_time = pg.time.get_ticks() - self.enemy_cannon.shoot_time
-            if elapsed_time >= self.enemy_cannon.time_to_shoot * 1000:
-                ball = self.enemy_cannon.strike()
-                self.balls.append(ball)
-                self.enemy_cannon.shoot_time = None
-
-    def get_nearest_target_position(self):
-        '''
-        Returns the position of the nearest target.
-        '''
-        if len(self.targets) == 0:
-            return self.gun.coord
-
-        min_distance = float('inf')
-        nearest_pos = None
-
-        for target in self.targets:
-            distance = math.sqrt((target.coord[0] - self.enemy_cannon.coord[0])**2 + (target.coord[1] - self.enemy_cannon.coord[1])**2)
-            if distance < min_distance:
-                min_distance = distance
-                nearest_pos = target.coord
-
-        return nearest_pos
 
     def draw(self, screen):
         '''
