@@ -379,6 +379,9 @@ class Manager:
         return done
 
     def handle_events(self, events):
+        '''
+        Handles events from keyboard, mouse, etc.
+        '''
         done = False
         for event in events:
             if event.type == pg.QUIT:
@@ -393,15 +396,14 @@ class Manager:
                     self.gun.horizontalMove(-5)
                 elif event.key == pg.K_RIGHT:
                     self.gun.horizontalMove(5)
-                elif event.type == pg.MOUSEBUTTONDOWN:
-                    if event.button == 1:
-                        self.gun.activate()
-                elif event.type == pg.MOUSEBUTTONUP:
-                    if event.button == 1:
-                        self.balls.append(self.gun.strike())
-                        self.score_t.b_used += 1
-            return done   
-
+            elif event.type == pg.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    self.gun.activate()
+            elif event.type == pg.MOUSEBUTTONUP:
+                if event.button == 1:
+                    self.balls.append(self.gun.strike())
+                    self.score_t.b_used += 1
+        return done
     def draw(self, screen):
         '''
         Runs balls', gun's, targets' and score table's drawing method.
