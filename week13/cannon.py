@@ -163,12 +163,15 @@ class Cannon(GameObject):
         '''
         self.angle = np.arctan2(target_pos[1] - self.coord[1], target_pos[0] - self.coord[0])
 
-    def move(self, inc):
-        '''
-        Changes vertical position of the gun.
-        '''
+        # created separate functions for vertical and horizontal movement of the cannon
+    def verticalMove(self, inc):
         if (self.coord[1] > 30 or inc > 0) and (self.coord[1] < SCREEN_SIZE[1] - 30 or inc < 0):
             self.coord[1] += inc
+
+    def horizontalMove(self, inc):
+
+        if (self.coord[0] > 30 or inc > 0) and (self.coord[0] < SCREEN_SIZE[0] - 30 or inc < 0):
+            self.coord[0] += inc
 
     def draw(self, screen):
         '''
@@ -376,26 +379,28 @@ class Manager:
         return done
 
     def handle_events(self, events):
-        '''
-        Handles events from keyboard, mouse, etc.
-        '''
         done = False
         for event in events:
             if event.type == pg.QUIT:
                 done = True
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_UP:
-                    self.gun.move(-5)
-                elif event.key == pg.K_DOWN:
-                    self.gun.move(5)
-            elif event.type == pg.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    self.gun.activate()
-            elif event.type == pg.MOUSEBUTTONUP:
-                if event.button == 1:
-                    self.balls.append(self.gun.strike())
-                    self.score_t.b_used += 1
-        return done
+                    self.gun.verticalMove(-5)
+                    elif event.key == pg.K_DOWN:
+                        self.gun.verticalMove(5)
+                    # implemented the horizontal movement with the left and right keys
+                    elif event.key == pg.K_LEFT:
+                        self.gun.horizontalMove(-5)
+                    elif event.key == pg.K_RIGHT:
+                        self.gun.horizontalMove(5)
+                elif event.type == pg.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        self.gun.activate()
+                elif event.type == pg.MOUSEBUTTONUP:
+                    if event.button == 1:
+                        self.balls.append(self.gun.strike())
+                        self.score_t.b_used += 1
+            return done   
 
     def draw(self, screen):
         '''
@@ -447,6 +452,8 @@ done = False
 clock = pg.time.Clock()
 
 mgr = Manager(n_targets=3)
+
+#cannon2 = EnemyCannon(coord=[SCREEN_SIZE[0]-30, SCREEN_SIZE[1]//2], angle=0, max_pow=50, min_pow=10, color=RED)
 
 while not done:
     clock.tick(15)
