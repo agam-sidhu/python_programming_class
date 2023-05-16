@@ -386,13 +386,13 @@ class Manager:
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_UP:
                     self.gun.verticalMove(-5)
-                    elif event.key == pg.K_DOWN:
-                        self.gun.verticalMove(5)
-                    # implemented the horizontal movement with the left and right keys
-                    elif event.key == pg.K_LEFT:
-                        self.gun.horizontalMove(-5)
-                    elif event.key == pg.K_RIGHT:
-                        self.gun.horizontalMove(5)
+                elif event.key == pg.K_DOWN:
+                    self.gun.verticalMove(5)
+                # implemented the horizontal movement with the left and right keys
+                elif event.key == pg.K_LEFT:
+                    self.gun.horizontalMove(-5)
+                elif event.key == pg.K_RIGHT:
+                    self.gun.horizontalMove(5)
                 elif event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.gun.activate()
