@@ -9,6 +9,7 @@ pg.font.init()
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
+BLUE = (0, 0, 255)
 SCREEN_SIZE = (800, 600)
 
 #test 2 
@@ -274,7 +275,7 @@ class EnemyCannon(Cannon):
     '''
     EnemyCannon class. Inherits methods from Cannon
     '''
-    def __init__(self, coord=[SCREEN_SIZE[0]-30, SCREEN_SIZE[1]//2], angle=0, max_pow=50, min_pow=10, color=RED):
+    def __init__(self, coord=[SCREEN_SIZE[0]-30, SCREEN_SIZE[1]//2], angle=0, max_pow=50, min_pow=10, color=BLUE):
         super().__init__(coord, angle, max_pow, min_pow, color)
         self.time_to_shoot = 2 # time delay to shoot in frames
         self.shoot_time = None # time the cannon shot
