@@ -1,15 +1,13 @@
 import numpy as np
 import pygame as pg
+import math
 from random import randint, gauss
 
 pg.init()
 pg.font.init()
-###this test 1
-###Synch TESTing
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
-#hello this is a test hellos-
 SCREEN_SIZE = (800, 600)
 
 #test 2 
@@ -29,7 +27,11 @@ class Shell(GameObject):
     '''
     The ball class. Creates a ball, controls it's movement and implement it's rendering.
     '''
-    def __init__(self, coord, vel, rad=20, color=None):
+    # we added a sides variable to implement various types of projectiles
+    # the number of sides is a random number between 0 and 4
+    # 0,1,2 will draw a circle, 3 will draw a triangular shape, 4 will draw a square/rectangle
+
+    def __init__(self, coord, vel, rad = 20, color = None, sides = 0):
         '''
         Constructor method. Initializes ball's parameters and initial values.
         '''
@@ -39,11 +41,12 @@ class Shell(GameObject):
             color = rand_color()
         self.color = color
         self.rad = rad
+        self.sides = randint(0, 4)
         self.is_alive = True
 
-    def check_corners(self, refl_ort=0.8, refl_par=0.9):
+    def check_corners(self, refl_ort = 0.8, refl_par = 0.9):
         '''
-        Reflects ball's velocity when ball bumps into the screen corners. Implemetns inelastic rebounce.
+        Reflects ball's velocity when ball bumps into the screen corners. Implements inelastic rebounce.
         '''
         for i in range(2):
             if self.coord[i] < self.rad:
@@ -55,7 +58,7 @@ class Shell(GameObject):
                 self.vel[i] = -int(self.vel[i] * refl_ort)
                 self.vel[1-i] = int(self.vel[1-i] * refl_par)
 
-    def move(self, time=1, grav=0):
+    def move(self, time = 1, grav = 0):
         '''
         Moves the ball according to it's velocity and time step.
         Changes the ball's velocity due to gravitational force.
@@ -69,10 +72,50 @@ class Shell(GameObject):
 
     def draw(self, screen):
         '''
-        Draws the ball on appropriate surface.
+        Draws the shell on appropriate surface.
         '''
-        pg.draw.circle(screen, self.color, self.coord, self.rad)
+        # checks what to draw depending on number of sides
+        # 0,1,2 will draw a circle, 3 will draw a triangular shape, 4 will draw a square/rectangle
 
+        if self.sides == 4:
+            pg.draw.polygon(screen, self.color, self.get_square_points())
+        elif self.sides == 3:
+            pg.draw.polygon(screen, self.color, self.get_polygon_points(), self.rad)
+        else:
+            pg.draw.circle(screen, self.color, self.coord, self.rad)
+
+    # here we create a function to define the points of a square/rectangle if the number of sides is 4
+    # we store the coordinates in a list of tuples
+
+    def get_square_points(self):
+        """
+        Helper method to calculate the points of the square.
+        """
+        x, y = self.coord
+        points = [(x - self.rad, y - self.rad), 
+                 (x + self.rad, y - self.rad), 
+                 (x + self.rad, y + self.rad), 
+                 (x - self.rad, y + self.rad)]
+        return points
+
+    # this is similar to the get_square_points function but it is for polygons. 
+    # this will get the points to shapes with the number of sides being 3
+
+    def get_polygon_points(self):
+        '''
+        Helper method to calculate the points of the polygon.
+        '''
+
+        # polygons have angles so we need to use the math library
+        # depending on the number of sides, we call a loop to continue to generate coordinate points
+
+        angle = 2 * math.pi / self.sides
+        points = []
+        for i in range(self.sides):
+            x = int(self.rad * math.cos(i * angle))
+            y = int(self.rad * math.sin(i * angle))
+            points.append((self.coord[0] + x, self.coord[1] + y))
+        return points
 
 class Cannon(GameObject):
     '''
@@ -120,10 +163,6 @@ class Cannon(GameObject):
         '''
         self.angle = np.arctan2(target_pos[1] - self.coord[1], target_pos[0] - self.coord[0])
 
-    def enemy_cannon(self, user_pos):
-        self.set_angle(user_pos)
-        return self.strike()
-    
     def move(self, inc):
         '''
         Changes vertical position of the gun.
@@ -146,93 +185,12 @@ class Cannon(GameObject):
         gun_shape.append((gun_pos - vec_1).tolist())
         pg.draw.polygon(screen, self.color, gun_shape)
 
-class EnemyCannon(GameObject):
-    '''
-    Cannon class. Manages it's renderring, movement and striking.
-    '''
-    def __init__(self, coord, angle, max_pow, min_pow, color):
-        '''
-        Constructor method. Sets coordinate, direction, minimum and maximum power and color of the gun.
-        '''
-        self.coord = coord
-        self.angle = angle
-        self.max_pow = max_pow
-        self.min_pow = min_pow
-        self.color = color
-        self.active = False
-        self.pow = min_pow
-    
-    def activate(self):
-        '''
-        Activates gun's charge.
-        '''
-        self.active = True
-
-    def gain(self, inc=2):
-        '''
-        Increases current gun charge power.
-        '''
-        if self.active and self.pow < self.max_pow:
-            self.pow += inc
-
-    def strike(self, angle=None):
-        '''
-        Creates ball, according to gun's direction and current charge power.
-        '''
-        if angle is None:
-            angle = self.angle
-
-        # Calculate the velocity of the shell
-        vel = [self.pow * np.cos(np.radians(angle)),
-               -self.pow * np.sin(np.radians(angle))]
-
-        # Create a new shell object
-        new_shell = Shell(list(self.coord), vel, 10)
-
-        # Reset the cannon
-        self.pow = 0
-        self.active = False
-
-    def set_angle(self, target_pos):
-        '''
-        Sets gun's direction to target position.
-        '''
-        self.angle = np.arctan2(target_pos[1] - self.coord[1], target_pos[0] - self.coord[0])
-
-    def enemy_cannon(self, user_pos):
-        self.set_angle(user_pos)
-        return self.strike()
-    
-    def move(self, inc):
-        '''
-        Changes vertical position of the gun.
-        '''
-        '''if (self.coord[1] > 30 or inc > 0) and (self.coord[1] < SCREEN_SIZE[1] - 30 or inc < 0):
-            self.coord[1] += inc
-        doesn't move        
-        '''
-
-    def draw(self, screen):
-        '''
-        Draws the gun on the screen.
-        '''
-        
-        gun_shape = []
-        vec_1 = np.array([int(5*np.cos(self.angle - np.pi/2)), int(5*np.sin(self.angle - np.pi/2))])
-        vec_2 = np.array([int(self.pow*np.cos(self.angle)), int(self.pow*np.sin(self.angle))])
-        gun_pos = np.array(self.coord)
-        gun_shape.append((gun_pos + vec_1).tolist())
-        gun_shape.append((gun_pos + vec_1 + vec_2).tolist())
-        gun_shape.append((gun_pos + vec_2 - vec_1).tolist())
-        gun_shape.append((gun_pos - vec_1).tolist())
-        pg.draw.polygon(screen, self.color, gun_shape)
-
 
 class Target(GameObject):
     '''
     Target class. Creates target, manages it's rendering and collision with a ball event.
     '''
-    def __init__(self, coord=None, color=None, rad=30):
+    def __init__(self, coord=None, color=None, rad=30, sides = 0):
         '''
         Constructor method. Sets coordinate, color and radius of the target.
         '''
@@ -240,6 +198,7 @@ class Target(GameObject):
             coord = [randint(rad, SCREEN_SIZE[0] - rad), randint(rad, SCREEN_SIZE[1] - rad)]
         self.coord = coord
         self.rad = rad
+        self.sides = randint(0, 4)
 
         if color == None:
             color = rand_color()
@@ -257,8 +216,49 @@ class Target(GameObject):
         '''
         Draws the target on the screen
         '''
-        pg.draw.circle(screen, self.color, self.coord, self.rad)
+        # checks what to draw depending on number of sides
+        # 0,1,2 will draw a circle, 3 will draw a triangular shape, 4 will draw a square/rectangle
 
+        if self.sides == 4:
+            pg.draw.polygon(screen, self.color, self.get_square_points())
+        elif self.sides == 3:
+            pg.draw.polygon(screen, self.color, self.get_polygon_points(), self.rad)
+        else:
+            pg.draw.circle(screen, self.color, self.coord, self.rad)
+
+    # here we create a function to define the points of a square/rectangle if the number of sides is 4
+    # we store the coordinates in a list of tuples
+
+    def get_square_points(self):
+        """
+        Helper method to calculate the points of the square.
+        """
+        x, y = self.coord
+        points = [(x - self.rad, y - self.rad), 
+                 (x + self.rad, y - self.rad), 
+                 (x + self.rad, y + self.rad), 
+                 (x - self.rad, y + self.rad)]
+        return points
+
+    # this is similar to the get_square_points function but it is for polygons. 
+    # this will get the points to shapes with the number of sides being 3
+
+    def get_polygon_points(self):
+        '''
+        Helper method to calculate the points of the polygon.
+        '''
+
+        # polygons have angles so we need to use the math library
+        # depending on the number of sides, we call a loop to continue to generate coordinate points
+
+        angle = 2 * math.pi / self.sides
+        points = []
+        for i in range(self.sides):
+            x = int(self.rad * math.cos(i * angle))
+            y = int(self.rad * math.sin(i * angle))
+            points.append((self.coord[0] + x, self.coord[1] + y))
+        return points
+    
     def move(self):
         """
         This type of target can't move at all.
@@ -267,15 +267,38 @@ class Target(GameObject):
         pass
 
 class MovingTargets(Target):
-    def __init__(self, coord=None, color=None, rad=30):
+    def __init__(self, coord = None, color = None, rad = 30, sides = 0):
         super().__init__(coord, color, rad)
         self.vx = randint(-2, +2)
         self.vy = randint(-2, +2)
-    
-    def move(self):
+        self.x_offset = randint(0, 360)
+        self.y_offset = randint(0, 360)
+        self.ax = 0.1  # acceleration in x direction
+        self.ay = 0.1  # acceleration in y direction
+
+    # created 2 different types of movement for moving targets
+
+    # this is the regular movement as it is static
+    def linearMovement(self):
         self.coord[0] += self.vx
         self.coord[1] += self.vy
 
+    # this movement accelerates the target making it more difficult to hit
+    def accelerateMovement(self):
+        self.vx += self.ax
+        self.vy += self.ay
+        self.coord[0] += self.vx
+        self.coord[1] += self.vy
+
+    # we generate a random integer between 0 and 1.
+    # 1 = linear movement
+    # 2 = accelerated movement
+    def move(self):
+        movement_type = randint(0, 1)
+        if movement_type == 0:
+            self.linearMovement()
+        elif movement_type == 1:
+            self.accelerateMovement()
 
 class ScoreTable:
     '''
@@ -420,7 +443,7 @@ while not done:
     clock.tick(15)
     screen.fill(BLACK)
 
-    done = mgr.process(pg.event.get(), screen)
+    done = mgr.process(pg.event.get(), screen) 
 
     pg.display.flip()
 
