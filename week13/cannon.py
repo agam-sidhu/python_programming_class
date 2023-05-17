@@ -157,7 +157,7 @@ class Cannon(GameObject):
         ball = Shell(list(self.coord), [int(vel * np.cos(angle)), int(vel * np.sin(angle))])
         self.pow = self.min_pow
         self.active = False
-        last_user_shot_time = pg.time.get_ticks()
+        self.last_user_shot_time = pg.time.get_ticks()
         return ball
         
     def set_angle(self, target_pos):
@@ -287,32 +287,30 @@ class EnemyCannon(Cannon):
     def cannon_movement(self):
         self.verticalMove(random.randint(-30, 30))
         self.horizontalMove(random.randint(-30, 30))
+
+    def strike(self):
+        angle = self.aim_at_user()
+        ball = Shell(list(self.coord), [int(25 * np.cos(angle)), int(25 * np.sin(angle))])
+        self.pow = self.min_pow
+        self.active = False
+        return ball
     
-    def shoot(self):
+    def shoot(self, last_user_shot_time):
         current_time = pg.time.get_ticks()
         elapsed_time = current_time - last_user_shot_time
         if elapsed_time >= 2000:  # 2000 milliseconds = 2 seconds
             ball = self.strike()
-            self.balls.append(ball)
             last_user_shot_time = current_time
-
-    def get_nearest_target_position(self):
+        
+    def aim_at_user(self, user_coord):
         '''
-        Returns the position of the nearest target.
+        Adjust the angle of the enemy cannon to aim at the user cannon.
         '''
-        if len(self.targets) == 0:
-            return self.gun.coord
+        dx = user_coord[0] - self.coord[0]
+        dy = user_coord[1] - self.coord[1]
+        self.angle = math.degrees(math.atan2(dy, dx))
+        return self.angle
 
-        min_distance = float('inf')
-        nearest_pos = None
-
-        for target in self.targets:
-            distance = math.sqrt((target.coord[0] - self.enemy_cannon.coord[0])**2 + (target.coord[1] - self.enemy_cannon.coord[1])**2)
-            if distance < min_distance:
-                min_distance = distance
-                nearest_pos = target.coord
-
-        return nearest_pos
 
 class MovingTargets(Target):
     def __init__(self, coord = None, color = None, rad = 30, sides = 0):
@@ -376,6 +374,8 @@ class Manager:
     '''
     Class that manages events' handling, ball's motion and collision, target creation, etc.
     '''
+    last_user_shot_time = 0
+
     def __init__(self, n_targets=1):
         self.balls = []
         self.gun = Cannon()
@@ -384,6 +384,7 @@ class Manager:
         self.score_t = ScoreTable()
         self.n_targets = n_targets
         self.new_mission()
+        self.user_coord = None
 
     def new_mission(self):
         '''
@@ -414,6 +415,18 @@ class Manager:
 
         return done
 
+    def update(self):
+        self.handle_events()
+        self.cannon.set_angle(self.user_coord)
+        for ball in self.balls:
+            ball.move()
+            if ball.is_alive and self.enemy_cannon.check_collision(ball):
+                ball.is_alive = False
+                self.score.t_destr += 1
+        self.balls = [ball for ball in self.balls if ball.is_alive]
+        self.enemy_cannon.shoot(self.cannon.last_user_shot_time)
+        self.enemy_cannon.coord = self.user_coord 
+
     def handle_events(self, events):
         '''
         Handles events from keyboard, mouse, etc.
@@ -437,13 +450,13 @@ class Manager:
                     self.gun.horizontalMove(5)
                     self.enemy_cannon.cannon_movement()
             elif event.type == pg.MOUSEBUTTONDOWN:
+                self.user_coord = pg.mouse.get_pos()
                 if event.button == 1:
                     self.gun.activate()
                     self.enemy_cannon.activate()
             elif event.type == pg.MOUSEBUTTONUP:
                 if event.button == 1:
                     self.balls.append(self.gun.strike())
-                    self.enemy_cannon.shoot()
                     self.score_t.b_used += 1
         return done
 
@@ -491,6 +504,10 @@ class Manager:
             self.score_t.t_destr += 1
             self.targets.pop(j)
 
+    def enough_time_passed(self):
+        current_time = pg.time.get_ticks()
+        elapsed_time = current_time - self.last_user_shot_time
+        return elapsed_time >= 2000
 
 screen = pg.display.set_mode(SCREEN_SIZE)
 pg.display.set_caption("The gun of Khiryanov")
@@ -502,7 +519,7 @@ mgr = Manager(n_targets=3)
 
 
 while not done:
-    last_user_shot_time = pg.time.get_ticks()
+    
     clock.tick(15)
     screen.fill(BLACK)
 
