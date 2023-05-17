@@ -409,7 +409,6 @@ class Manager:
         self.score_t = ScoreTable()
         self.n_targets = n_targets
         self.bombs = []
-        self.bomb = Bomb()
         self.new_mission()
         self.user_coord = None
 
@@ -420,15 +419,13 @@ class Manager:
         for i in range(self.n_targets):
             self.targets.append(MovingTargets(rad=randint(max(1, 30 - 2*max(0, self.score_t.score())),
                 30 - max(0, self.score_t.score()))))
-            self.handle_bombs()
             self.targets.append(Target(rad=randint(max(1, 30 - 2*max(0, self.score_t.score())),
                 30 - max(0, self.score_t.score()))))
-            self.handle_bombs()
+            
         # bombs move until user shoots targets
         
         for target in self.targets:
             self.bombs.append(Bomb(coord=target.coord))
-            self.bomb.move()
 
     def process(self, events, screen):
         '''
@@ -519,11 +516,8 @@ class Manager:
         for i in reversed(dead_balls):
             self.balls.pop(i)
             self.enemy_balls.pop(i)
-            self.bombs.pop(i)
         for i, target in enumerate(self.targets):
             target.move()
-        for i, bomb in enumerate(self.bombs):
-            bomb.move()
         self.gun.gain()
 
     def collide(self):
@@ -554,6 +548,7 @@ class Manager:
                 self.user_cannon_hit = True
             if bomb.coord[1] > SCREEN_SIZE[1]:
                 self.bombs.remove(bomb)
+
     
 screen = pg.display.set_mode(SCREEN_SIZE)
 pg.display.set_caption("The gun of Khiryanov")
