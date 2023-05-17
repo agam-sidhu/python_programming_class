@@ -542,6 +542,7 @@ class Manager:
         for j in reversed(targets_c):
             self.score_t.t_destr += 1
             self.targets.pop(j)
+            self.bombs.pop(j)
     
     def handle_bombs(self):
         '''
