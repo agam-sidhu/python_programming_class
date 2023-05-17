@@ -507,7 +507,7 @@ class Manager:
             ball.move(grav=2)
             if not ball.is_alive:
                 dead_balls.append(i)
-        # we want the enemy  balls to move
+        # we want the enemy balls to move
         for i, ball in enumerate(self.enemy_balls):
             ball.move(grav=2)
             if not ball.is_alive:
