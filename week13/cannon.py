@@ -118,6 +118,44 @@ class Shell(GameObject):
             y = int(self.rad * math.sin(i * angle))
             points.append((self.coord[0] + x, self.coord[1] + y))
         return points
+class Bomb (GameObject):
+    '''
+    Bomb class. Creates bombs, manages their movement and collision with the user's cannon.
+    '''
+    def __init__(self, coord=None, vel=None, rad=10, color=None):
+        if coord is None:
+            coord = [randint(rad, SCREEN_SIZE[0] - rad), 0]
+        if vel is None:
+            vel = [0, 5]
+        self.coord = coord
+        self.vel = vel
+        self.rad = rad
+        if color is None:
+            color = rand_color()
+        self.color = color
+        self.is_alive = True
+
+    def move(self):
+        '''
+        Moves the bomb according to its velocity.
+        '''
+        self.coord[0] += self.vel[0]
+        self.coord[1] += self.vel[1]
+
+    def check_collision(self, cannon):
+        '''
+        Checks if the bomb collides with the user's cannon.
+        '''
+        dist = sum([(self.coord[i] - cannon.coord[i])**2 for i in range(2)])**0.5
+        min_dist = self.rad + cannon.rad
+        return dist <= min_dist
+
+    def draw(self, screen):
+        '''
+        Draws the bomb on the screen.
+        '''
+        pg.draw.circle(screen, self.color, self.coord, self.rad) 
+
 
 class Cannon(GameObject):
     '''
