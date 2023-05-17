@@ -447,7 +447,7 @@ class Manager:
         self.collide()
 
         self.draw(screen)
-
+        
         if len(self.targets) == 0 and len(self.balls) == 0:
             self.new_mission()
 
@@ -535,6 +535,31 @@ class Manager:
         elapsed_time = current_time - self.last_user_shot_time
         return elapsed_time >= 2000
 
+    def make_bomb(self):
+        '''
+        Creates a bomb and adds it to the list of bombs.
+        '''
+        bomb = Bomb()
+        self.bombs.append(bomb)
+    
+    def handle_bombs(self):
+        '''
+        Handles bomb motion, collision, and removal.
+        '''
+        for bomb in self.bombs:
+            bomb.move()
+            if bomb.check_collision(self.user_cannon):
+                self.user_cannon_hit = True
+            if bomb.coord[1] > SCREEN_SIZE[1]:
+                self.bombs.remove(bomb)
+
+    def draw_bombs(self, screen):
+        '''
+        Draws the bombs on the screen.
+        '''
+        for bomb in self.bombs:
+            bomb.draw(screen)
+    
 screen = pg.display.set_mode(SCREEN_SIZE)
 pg.display.set_caption("The gun of Khiryanov")
 
@@ -549,7 +574,8 @@ while not done:
     clock.tick(15)
     screen.fill(BLACK)
 
-    done = mgr.process(pg.event.get(), screen)   
+    done = mgr.process(pg.event.get(), screen)
+
     pg.display.flip()
 
 
