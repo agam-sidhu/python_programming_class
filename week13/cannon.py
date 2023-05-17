@@ -12,7 +12,6 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 SCREEN_SIZE = (800, 600)
 
-#test 2 
 def rand_color():
     return (randint(0, 255), randint(0, 255), randint(0, 255))
 
@@ -318,8 +317,6 @@ class EnemyCannon(Cannon):
     '''
     def __init__(self, coord=[SCREEN_SIZE[0]-30, SCREEN_SIZE[1]//2], angle=0, max_pow=50, min_pow=10, color=BLUE):
         super().__init__(coord, angle, max_pow, min_pow, color)
-        self.time_to_shoot = 2 # time delay to shoot in frames
-        self.shoot_time = None # time the cannon shot
         #changed power to enemy cannon to 35
         self.pow = 35
 
@@ -338,25 +335,7 @@ class EnemyCannon(Cannon):
         ball = Shell(list(self.coord), [int(35 * np.cos(angle + 180)), int(35 * np.sin(angle + 180))])
         self.pow = self.min_pow
         self.active = False
-        self.last_user_shot_time = pg.time.get_ticks()
         return ball
-    
-    def shoot(self, last_user_shot_time):
-        current_time = pg.time.get_ticks()
-        elapsed_time = current_time - last_user_shot_time
-        if elapsed_time >= 2000:  # 2000 milliseconds = 2 seconds
-            ball = self.strike()
-            last_user_shot_time = current_time
-        
-    def aim_at_user(self, user_coord):
-        '''
-        Adjust the angle of the enemy cannon to aim at the user cannon.
-        '''
-        dx = user_coord[0] - self.coord[0]
-        dy = user_coord[1] - self.coord[1]
-        self.angle = math.degrees(math.atan2(dy, dx))
-        return self.angle
-
 
 class MovingTargets(Target):
     def __init__(self, coord = None, color = None, rad = 30, sides = 0):
@@ -430,6 +409,7 @@ class Manager:
         self.score_t = ScoreTable()
         self.n_targets = n_targets
         self.bombs = []
+        self.bomb = Bomb()
         self.new_mission()
         self.user_coord = None
 
@@ -440,13 +420,15 @@ class Manager:
         for i in range(self.n_targets):
             self.targets.append(MovingTargets(rad=randint(max(1, 30 - 2*max(0, self.score_t.score())),
                 30 - max(0, self.score_t.score()))))
+            self.handle_bombs()
             self.targets.append(Target(rad=randint(max(1, 30 - 2*max(0, self.score_t.score())),
                 30 - max(0, self.score_t.score()))))
-            
+            self.handle_bombs()
         # bombs move until user shoots targets
         
         for target in self.targets:
             self.bombs.append(Bomb(coord=target.coord))
+            self.bomb.move()
 
     def process(self, events, screen):
         '''
@@ -537,8 +519,11 @@ class Manager:
         for i in reversed(dead_balls):
             self.balls.pop(i)
             self.enemy_balls.pop(i)
+            self.bombs.pop(i)
         for i, target in enumerate(self.targets):
             target.move()
+        for i, bomb in enumerate(self.bombs):
+            bomb.move()
         self.gun.gain()
 
     def collide(self):
@@ -557,11 +542,6 @@ class Manager:
         for j in reversed(targets_c):
             self.score_t.t_destr += 1
             self.targets.pop(j)
-
-    def enough_time_passed(self):
-        current_time = pg.time.get_ticks()
-        elapsed_time = current_time - self.last_user_shot_time
-        return elapsed_time >= 2000
     
     def handle_bombs(self):
         '''
@@ -573,13 +553,6 @@ class Manager:
                 self.user_cannon_hit = True
             if bomb.coord[1] > SCREEN_SIZE[1]:
                 self.bombs.remove(bomb)
-
-    def draw_bombs(self, screen):
-        '''
-        Draws the bombs on the screen.
-        '''
-        for bomb in self.bombs:
-            bomb.draw(screen)
     
 screen = pg.display.set_mode(SCREEN_SIZE)
 pg.display.set_caption("The gun of Khiryanov")
