@@ -401,31 +401,19 @@ class Manager:
         Runs all necessary method for each iteration. Adds new targets, if previous are destroyed.
         '''
         done = self.handle_events(events)
-
         if pg.mouse.get_focused():
             mouse_pos = pg.mouse.get_pos()
             self.gun.set_angle(mouse_pos)
         
         self.move()
         self.collide()
+
         self.draw(screen)
 
         if len(self.targets) == 0 and len(self.balls) == 0:
             self.new_mission()
 
         return done
-
-    def update(self):
-        self.handle_events()
-        self.cannon.set_angle(self.user_coord)
-        for ball in self.balls:
-            ball.move()
-            if ball.is_alive and self.enemy_cannon.check_collision(ball):
-                ball.is_alive = False
-                self.score.t_destr += 1
-        self.balls = [ball for ball in self.balls if ball.is_alive]
-        self.enemy_cannon.shoot(self.cannon.last_user_shot_time)
-        self.enemy_cannon.coord = self.user_coord 
 
     def handle_events(self, events):
         '''
@@ -523,9 +511,7 @@ while not done:
     clock.tick(15)
     screen.fill(BLACK)
 
-    done = mgr.process(pg.event.get(), screen) 
-    
-
+    done = mgr.process(pg.event.get(), screen)   
     pg.display.flip()
 
 
