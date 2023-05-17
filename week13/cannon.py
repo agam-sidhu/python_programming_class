@@ -118,11 +118,12 @@ class Shell(GameObject):
             y = int(self.rad * math.sin(i * angle))
             points.append((self.coord[0] + x, self.coord[1] + y))
         return points
+
 class Bomb (GameObject):
     '''
     Bomb class. Creates bombs, manages their movement and collision with the user's cannon.
     '''
-    def __init__(self, coord=None, vel=None, rad=10, color=None):
+    def __init__(self, coord=None, vel=None, rad=10, color=BLUE):
         if coord is None:
             coord = [randint(rad, SCREEN_SIZE[0] - rad), 0]
         if vel is None:
@@ -247,7 +248,14 @@ class Target(GameObject):
         if color == None:
             color = rand_color()
         self.color = color
-
+        
+    def drop_bomb(self):
+        '''
+        Creates a new bomb and adds it to the list of bombs.
+        '''
+        bomb = Bomb(coord=self.coord.copy())
+        self.bombs.append(bomb)
+    
     def check_collision(self, ball):
         '''
         Checks whether the ball bumps into target.
@@ -423,6 +431,7 @@ class Manager:
         self.n_targets = n_targets
         self.new_mission()
         self.user_coord = None
+        self.bombs = []
 
     def new_mission(self):
         '''
@@ -445,9 +454,8 @@ class Manager:
         
         self.move()
         self.collide()
-
         self.draw(screen)
-        
+        self.draw_bombs(screen)
         if len(self.targets) == 0 and len(self.balls) == 0:
             self.new_mission()
 
