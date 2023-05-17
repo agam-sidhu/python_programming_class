@@ -490,6 +490,8 @@ class Manager:
                 elif event.key == pg.K_RIGHT:
                     self.gun.horizontalMove(5)
                     self.enemy_cannon.cannon_movement()
+                elif event.key == pg.K_ESCAPE:
+                    done = True
             elif event.type == pg.MOUSEBUTTONDOWN:
                 self.user_coord = pg.mouse.get_pos()
                 if event.button == 1:
