@@ -162,7 +162,7 @@ class Cannon(GameObject):
     '''
     Cannon class. Manages it's renderring, movement and striking.
     '''
-    def __init__(self, coord=[30, SCREEN_SIZE[1]//2], angle=0, max_pow=50, min_pow=10, color=RED):
+    def __init__(self, coord=[30, SCREEN_SIZE[1]//2], angle=0, max_pow=50, min_pow=10, color=RED, health = 100):
         '''
         Constructor method. Sets coordinate, direction, minimum and maximum power and color of the gun.
         '''
@@ -173,6 +173,7 @@ class Cannon(GameObject):
         self.color = color
         self.active = False
         self.pow = min_pow
+        self.health = health
    
     def activate(self):
         '''
@@ -438,6 +439,7 @@ class Manager:
         self.n_targets = n_targets
         self.new_mission()
         self.user_coord = None
+        self.bomb = Bomb()
         self.bombs = []
 
     def new_mission(self):
@@ -564,13 +566,6 @@ class Manager:
         current_time = pg.time.get_ticks()
         elapsed_time = current_time - self.last_user_shot_time
         return elapsed_time >= 2000
-
-    def make_bomb(self):
-        '''
-        Creates a bomb and adds it to the list of bombs.
-        '''
-        bomb = Bomb()
-        self.bombs.append(bomb)
     
     def handle_bombs(self):
         '''
@@ -580,6 +575,7 @@ class Manager:
             bomb.move()
             if bomb.check_collision(self.user_cannon):
                 self.user_cannon_hit = True
+                self.gun.health -= 10
             if bomb.coord[1] > SCREEN_SIZE[1]:
                 self.bombs.remove(bomb)
 
