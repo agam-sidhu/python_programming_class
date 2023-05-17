@@ -123,7 +123,7 @@ class Bomb (GameObject):
     '''
     Bomb class. Creates bombs, manages their movement and collision with the user's cannon.
     '''
-    def __init__(self, coord=None, vel=None, rad=10, color=BLUE):
+    def __init__(self, coord=None, vel=None, rad=10, color=RED):
         if coord is None:
             coord = [randint(rad, SCREEN_SIZE[0] - rad), 0]
         if vel is None:
@@ -415,7 +415,6 @@ class ScoreTable:
         for i in range(3):
             screen.blit(score_surf[i], [10, 10 + 30*i])
 
-
 class Manager:
     '''
     Class that manages events' handling, ball's motion and collision, target creation, etc.
@@ -444,6 +443,8 @@ class Manager:
             self.targets.append(Target(rad=randint(max(1, 30 - 2*max(0, self.score_t.score())),
                 30 - max(0, self.score_t.score()))))
             
+        # bombs move until user shoots targets
+        
         for target in self.targets:
             self.bombs.append(Bomb(coord=target.coord))
 
