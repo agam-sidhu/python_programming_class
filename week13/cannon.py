@@ -341,7 +341,7 @@ class EnemyCannon(Cannon):
         vel = self.pow
         angle = self.angle
         # adjussted the angle so it shoots towards the user cannon
-        ball = Shell(list(self.coord), [int(vel * np.cos(angle + 180)), int(vel * np.sin(angle + 180))])
+        ball = Shell(list(self.coord), [int(35 * np.cos(angle + 180)), int(35 * np.sin(angle + 180))])
         self.pow = self.min_pow
         self.active = False
         self.last_user_shot_time = pg.time.get_ticks()
