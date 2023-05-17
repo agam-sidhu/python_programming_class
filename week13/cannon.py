@@ -430,9 +430,9 @@ class Manager:
         self.targets = []
         self.score_t = ScoreTable()
         self.n_targets = n_targets
+        self.bombs = []
         self.new_mission()
         self.user_coord = None
-        self.bombs = []
 
     def new_mission(self):
         '''
