@@ -157,6 +157,7 @@ class Cannon(GameObject):
         ball = Shell(list(self.coord), [int(vel * np.cos(angle)), int(vel * np.sin(angle))])
         self.pow = self.min_pow
         self.active = False
+        last_user_shot_time = pg.time.get_ticks()
         return ball
         
     def set_angle(self, target_pos):
@@ -287,18 +288,13 @@ class EnemyCannon(Cannon):
         self.verticalMove(random.randint(-30, 30))
         self.horizontalMove(random.randint(-30, 30))
     
-    def enemy_cannon_shoot(self):
-        '''
-        Controls the shooting of the enemy cannon.
-        '''
-        if self.enemy_cannon.shoot_time is None:
-            self.enemy_cannon.shoot_time = pg.time.get_ticks()
-        else:
-            elapsed_time = pg.time.get_ticks() - self.enemy_cannon.shoot_time
-            if elapsed_time >= self.enemy_cannon.time_to_shoot * 1000:
-                ball = self.enemy_cannon.strike()
-                self.balls.append(ball)
-                self.enemy_cannon.shoot_time = None
+    def shoot(self):
+        current_time = pg.time.get_ticks()
+        elapsed_time = current_time - last_user_shot_time
+        if elapsed_time >= 2000:  # 2000 milliseconds = 2 seconds
+            ball = self.strike()
+            self.balls.append(ball)
+            last_user_shot_time = current_time
 
     def get_nearest_target_position(self):
         '''
@@ -443,9 +439,11 @@ class Manager:
             elif event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     self.gun.activate()
+                    self.enemy_cannon.activate()
             elif event.type == pg.MOUSEBUTTONUP:
                 if event.button == 1:
                     self.balls.append(self.gun.strike())
+                    self.enemy_cannon.shoot()
                     self.score_t.b_used += 1
         return done
 
@@ -504,6 +502,7 @@ mgr = Manager(n_targets=3)
 
 
 while not done:
+    last_user_shot_time = pg.time.get_ticks()
     clock.tick(15)
     screen.fill(BLACK)
 
