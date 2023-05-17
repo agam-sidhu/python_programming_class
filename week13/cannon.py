@@ -162,7 +162,7 @@ class Cannon(GameObject):
     '''
     Cannon class. Manages it's renderring, movement and striking.
     '''
-    def __init__(self, coord=[30, SCREEN_SIZE[1]//2], angle=0, max_pow=50, min_pow=10, color=RED, health = 100):
+    def __init__(self, coord=[30, SCREEN_SIZE[1]//2], angle=0, max_pow=50, min_pow=10, color=RED):
         '''
         Constructor method. Sets coordinate, direction, minimum and maximum power and color of the gun.
         '''
@@ -173,7 +173,6 @@ class Cannon(GameObject):
         self.color = color
         self.active = False
         self.pow = min_pow
-        self.health = health
    
     def activate(self):
         '''
@@ -305,13 +304,6 @@ class Target(GameObject):
             y = int(self.rad * math.sin(i * angle))
             points.append((self.coord[0] + x, self.coord[1] + y))
         return points
-    
-    def draw_bombs(self, screen):
-        '''
-        Draws the bombs on the screen.
-        '''
-        for bomb in self.bombs:
-            bomb.draw(screen)
 
     def move(self):
         """
@@ -440,7 +432,6 @@ class Manager:
         self.n_targets = n_targets
         self.new_mission()
         self.user_coord = None
-        self.bomb = Bomb()
         self.bombs = []
 
     def new_mission(self):
@@ -452,6 +443,9 @@ class Manager:
                 30 - max(0, self.score_t.score()))))
             self.targets.append(Target(rad=randint(max(1, 30 - 2*max(0, self.score_t.score())),
                 30 - max(0, self.score_t.score()))))
+            
+        for target in self.targets:
+            self.bombs.append(Bomb(coord=target.coord))
 
     def process(self, events, screen):
         '''
@@ -465,7 +459,6 @@ class Manager:
         self.move()
         self.collide()
         self.draw(screen)
-        self.draw_bombs(screen)
         if len(self.targets) == 0 and len(self.balls) == 0:
             self.new_mission()
 
@@ -577,7 +570,6 @@ class Manager:
             bomb.move()
             if bomb.check_collision(self.user_cannon):
                 self.user_cannon_hit = True
-                self.gun.health -= 10
             if bomb.coord[1] > SCREEN_SIZE[1]:
                 self.bombs.remove(bomb)
 
