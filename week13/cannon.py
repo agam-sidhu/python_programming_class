@@ -326,6 +326,8 @@ class EnemyCannon(Cannon):
         super().__init__(coord, angle, max_pow, min_pow, color)
         self.time_to_shoot = 2 # time delay to shoot in frames
         self.shoot_time = None # time the cannon shot
+        #changed power to enemy cannon to 35
+        self.pow = 35
 
     '''
     Enemy Cannon Movement function that makes the cannon go either vertical or horizontal after every user movement
@@ -334,11 +336,15 @@ class EnemyCannon(Cannon):
         self.verticalMove(random.randint(-30, 30))
         self.horizontalMove(random.randint(-30, 30))
 
+    # used the same strike function in cannon parent class
     def strike(self):
-        angle = self.aim_at_user()
-        ball = Shell(list(self.coord), [int(25 * np.cos(angle)), int(25 * np.sin(angle))])
+        vel = self.pow
+        angle = self.angle
+        # adjussted the angle so it shoots towards the user cannon
+        ball = Shell(list(self.coord), [int(vel * np.cos(angle + 180)), int(vel * np.sin(angle + 180))])
         self.pow = self.min_pow
         self.active = False
+        self.last_user_shot_time = pg.time.get_ticks()
         return ball
     
     def shoot(self, last_user_shot_time):
@@ -424,6 +430,7 @@ class Manager:
 
     def __init__(self, n_targets=1):
         self.balls = []
+        self.enemy_balls = []
         self.gun = Cannon()
         self.enemy_cannon = EnemyCannon()
         self.targets = []
@@ -491,6 +498,8 @@ class Manager:
             elif event.type == pg.MOUSEBUTTONUP:
                 if event.button == 1:
                     self.balls.append(self.gun.strike())
+                    # enemy cannon shoots every time user shoots
+                    self.enemy_balls.append(self.enemy_cannon.strike())
                     self.score_t.b_used += 1
         return done
 
@@ -500,6 +509,9 @@ class Manager:
         Runs balls', gun's, targets' and score table's drawing method.
         '''
         for ball in self.balls:
+            ball.draw(screen)
+        # enemy_balls treated the same as user's balls
+        for ball in self.enemy_balls:
             ball.draw(screen)
         for target in self.targets:
             target.draw(screen)
@@ -516,8 +528,15 @@ class Manager:
             ball.move(grav=2)
             if not ball.is_alive:
                 dead_balls.append(i)
+        # we want the enemy  balls to move
+        for i, ball in enumerate(self.enemy_balls):
+            ball.move(grav=2)
+            if not ball.is_alive:
+                dead_balls.append(i)
+
         for i in reversed(dead_balls):
             self.balls.pop(i)
+            self.enemy_balls.pop(i)
         for i, target in enumerate(self.targets):
             target.move()
         self.gun.gain()
@@ -526,6 +545,7 @@ class Manager:
         '''
         Checks whether balls bump into targets, sets balls' alive trigger.
         '''
+        # we do not have enemy balls here as we only want it to collide with the user's balls
         collisions = []
         targets_c = []
         for i, ball in enumerate(self.balls):
