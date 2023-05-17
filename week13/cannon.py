@@ -250,12 +250,6 @@ class Target(GameObject):
             color = rand_color()
         self.color = color
         
-    def drop_bomb(self):
-        '''
-        Creates a new bomb and adds it to the list of bombs.
-        '''
-        bomb = Bomb(coord=self.coord.copy())
-        self.bombs.append(bomb)
     
     def check_collision(self, ball):
         '''
@@ -312,6 +306,13 @@ class Target(GameObject):
             points.append((self.coord[0] + x, self.coord[1] + y))
         return points
     
+    def draw_bombs(self, screen):
+        '''
+        Draws the bombs on the screen.
+        '''
+        for bomb in self.bombs:
+            bomb.draw(screen)
+
     def move(self):
         """
         This type of target can't move at all.
@@ -507,7 +508,6 @@ class Manager:
                     self.score_t.b_used += 1
         return done
 
-
     def draw(self, screen):
         '''
         Runs balls', gun's, targets' and score table's drawing method.
@@ -519,6 +519,8 @@ class Manager:
             ball.draw(screen)
         for target in self.targets:
             target.draw(screen)
+        for bomb in self.bombs:
+            bomb.draw(screen)
         self.gun.draw(screen)
         self.enemy_cannon.draw(screen) 
         self.score_t.draw(screen)
@@ -592,7 +594,7 @@ pg.display.set_caption("The gun of Khiryanov")
 done = False
 clock = pg.time.Clock()
 
-mgr = Manager(n_targets=3)
+mgr = Manager(n_targets=4)
 
 
 while not done:
