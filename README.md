@@ -1,4 +1,7 @@
 # python_programming_class
+
+YOLOSOLODOLO is agam-sidhu's alternate account
+
 Python for programmers class
 Group Assignment
 Description:
@@ -23,3 +26,5 @@ Usage:
 3. Add a brief description of the changes made in the "Summary" field
 4. Click the “commit to main" button to save
 5. Click the "Push origin" button to upload the changes to the GitHub repository.
+
+
